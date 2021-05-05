@@ -62,13 +62,13 @@ class State:
 
     def print_board(self):
         ai_board, total_board = self.ai_position, self.game_position
-        for row in range(5, -1, -1):
+        for row in range(BOARD_HEIGHT-1, -1, -1):
             print("")
-            for column in range(0, 7):
-                if ai_board & (1 << (7 * column + row)):
-                    print("1", end='')
-                elif total_board & (1 << (7 * column + row)):
-                    print("2", end='')
+            for column in range(0, BOARD_WIDTH):
+                if ai_board & (1 << (BOARD_WIDTH * column + row)):
+                    print("1 ", end='')
+                elif total_board & (1 << (BOARD_WIDTH * column + row)):
+                    print("2 ", end='')
                 else:
-                    print("0", end='')
+                    print("0 ", end='')
         print("")
