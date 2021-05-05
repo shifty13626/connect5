@@ -74,8 +74,6 @@ class StateTest(unittest.TestCase):
         # 0 0 0 1 0
         # 0 0 0 0 1
         winning_position = 0b0001000000001000000001000000001000000001   # 5 coin in last line (bottom)
-        print(winning_position & (winning_position >> (8 + 1)) & (winning_position >> ((8 + 1) * 2)) & (
-                    winning_position >> ((8 + 1) * 3)) & (winning_position >> ((8 + 1) * 4)))
         self.assertTrue(State.is_winning_state(winning_position))
 
     def test_no_winner_diagonal_lr(self):
