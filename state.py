@@ -8,7 +8,7 @@ class State:
         self.game_position = game_position
 
     @property
-    def player_position(self):
+    def human_position(self):
         return self.ai_position ^ self.game_position
 
     @staticmethod
@@ -23,10 +23,23 @@ class State:
             return True  # vertical
         return False
 
+    @staticmethod
+    def is_draw_state(position):
+        is_draw = True
+        for column in range(0, BOARD_WIDTH):
+            if not (position & (1 << BOARD_HEIGHT * column + (BOARD_HEIGHT - 1))):
+                is_draw = False
+        return is_draw
 
     def is_terminal_state(self):
-        #TODO
-        return True
+        if self.is_winning_state(self.ai_position):
+            return True
+        elif self.is_winning_state(self.human_position):
+            return True
+        elif self.is_draw_state(self.game_position):
+            return True
+        else:
+            return False
 
     def get_heuristic(self):
         # TODO
