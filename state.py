@@ -16,42 +16,52 @@ class State:
 
     @staticmethod
     def is_winning_state(position):
-        if position & (position >> (BOARD_HEIGHT - 1)) & (position >> ((BOARD_HEIGHT - 1) * 2)) & (
-                (BOARD_HEIGHT - 1) * 3) & (position >> ((BOARD_HEIGHT - 1) * 4)) != 0:
+        if position & (position >> (BOARD_HEIGHT - 1)) & (position >> ((BOARD_HEIGHT - 1) * 2)) & ((BOARD_HEIGHT - 1) * 3) & (position >> ((BOARD_HEIGHT - 1) * 4)) != 0:
             return True  # diagonal \
-        if position & (position >> (BOARD_HEIGHT + 1)) & (position >> ((BOARD_HEIGHT + 1) * 2)) & (
-                position >> ((BOARD_HEIGHT + 1) * 3)) & (position >> ((BOARD_HEIGHT + 1) * 4)) != 0:
+        if position & (position >> (BOARD_HEIGHT + 1)) & (position >> ((BOARD_HEIGHT + 1) * 2)) & (position >> ((BOARD_HEIGHT + 1) * 3)) & (position >> ((BOARD_HEIGHT + 1) * 4)) != 0:
             return True  # diagonal /
-        if position & (position >> BOARD_HEIGHT) & (position >> (BOARD_HEIGHT * 2)) & (
-                position >> (BOARD_HEIGHT * 3)) & (position >> (BOARD_HEIGHT * 4)) != 0:
+        if position & (position >> BOARD_HEIGHT) & (position >> (BOARD_HEIGHT * 2)) & (position >> (BOARD_HEIGHT * 3)) & (position >> (BOARD_HEIGHT * 4)) != 0:
             return True  # horizontal
         if position & (position >> 1) & (position >> 2) & (position >> 3) & (position >> 4) != 0:
             return True  # vertical
         return False
 
+    @staticmethod
+    def is_draw_state(position):
+        is_draw = True
+        for column in range(0, BOARD_WIDTH):
+            if not (position & (1 << BOARD_HEIGHT * column + (BOARD_HEIGHT - 1))):
+                is_draw = False
+        return is_draw
+
     def is_terminal_state(self):
-        # TODO
-        return True
+        if self.is_winning_state(self.ai_position):
+            return True
+        elif self.is_winning_state(self.human_position):
+            return True
+        elif self.is_draw_state(self.game_position):
+            return True
+        else:
+            return False
 
     def get_heuristic(self):
         # TODO
         return 42
-
     def get_children(self):
         # TODO
         return self
 
     def print_board(self):
         ai_board, total_board = self.ai_position, self.game_position
-        for row in range(5, -1, -1):
+        for row in range(BOARD_HEIGHT-1, -1, -1):
             print("")
-            for column in range(0, 7):
-                if ai_board & (1 << (7 * column + row)):
-                    print("1", end='')
-                elif total_board & (1 << (7 * column + row)):
-                    print("2", end='')
+            for column in range(0, BOARD_WIDTH):
+                if ai_board & (1 << (BOARD_WIDTH * column + row)):
+                    print("1 ", end='')
+                elif total_board & (1 << (BOARD_WIDTH * column + row)):
+                    print("2 ", end='')
                 else:
-                    print("0", end='')
+                    print("0 ", end='')
         print("")
 
     def get_next_move(self):
