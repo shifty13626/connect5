@@ -65,32 +65,39 @@ class State:
                     print("0 ", end='')
         print("")
 
+    def __hash__(self):
+        return hash((self.ai_position, self.game_position))
+
+    def __eq__(self, other):
+        return (self.ai_position, self.game_position) == (
+            other.ai_position, other.game_position)
+
     def get_next_move(self):
 
-        def alpha_beta_pruning(state, alpha, beta, depth, max_depth):
-            if state.is_terminal_state() or depth > max_depth:
-                return state.get_heuristic()
-            if depth % 2 == 0:
-                value = infinity
-                for child in state.get_children():
+        def alpha_beta_pruning(ai_state, ai_alpha, ai_beta, ai_depth, ai_max_depth):
+            if ai_state.is_terminal_state() or ai_depth > ai_max_depth:
+                return ai_state.get_heuristic()
+            if ai_depth % 2 == 0:
+                w_value = infinity
+                for child in ai_state.get_children():
                     if child in known_states:
                         continue
-                    value = min(value, alpha_beta_pruning(child, alpha, beta, depth + 1, max_depth))
-                    known_states[child] = value
-                    if alpha >= value:
-                        return value
-                    beta = min(beta, value)
+                    w_value = min(w_value, alpha_beta_pruning(child, ai_alpha, ai_beta, ai_depth + 1, ai_max_depth))
+                    known_states[child] = w_value
+                    if ai_alpha >= w_value:
+                        return w_value
+                    ai_beta = min(ai_beta, w_value)
             else:
-                value = -infinity
-                for child in state.get_children():
+                w_value = -infinity
+                for child in ai_state.get_children():
                     if child in known_states:
                         continue
-                    value = max(value, alpha_beta_pruning(child, alpha, beta, depth + 1, max_depth))
-                    known_states[child] = alpha
-                    if value >= beta:
-                        return value
-                    alpha = min(alpha, value)
-            return value
+                    w_value = max(w_value, alpha_beta_pruning(child, ai_alpha, ai_beta, ai_depth + 1, ai_max_depth))
+                    known_states[child] = ai_alpha
+                    if w_value >= ai_beta:
+                        return w_value
+                    ai_alpha = min(ai_alpha, w_value)
+            return w_value
 
         known_states = {}
         best_state = None
