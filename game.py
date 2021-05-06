@@ -41,4 +41,9 @@ class Game:
                 print(Colors.HEADER.value + "L'IA vient de jouer" +Colors.HEADER.value)
                 current_player = Player.PLAYER
 
+        # end game
+        if winner == Player.PLAYER:
+            print(Colors.OKGREEN +"You win ! Congratulation !" +Colors.OKGREEN)
+        else:
+            print(Colors.FAIL + "What a shame! The IA have won the game" + Colors.FAIL)
 
