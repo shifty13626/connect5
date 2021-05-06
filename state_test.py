@@ -126,18 +126,30 @@ class StateTest(unittest.TestCase):
         self.assertFalse(State.is_winning_state(winning_position))
 
     def test_is_draw(self):
-        # 0 0 0 0 0
-        # 0 0 0 0 0
-        # 0 0 0 0 0
-        # 0 0 0 0 1
-        # 0 0 0 1 0
-        # 0 0 1 0 0
-        # 0 1 0 0 0
-        # 1 0 0 0 0
+        # 1 1 1 1 1
+        # 1 1 1 1 1
+        # 1 1 1 1 1
+        # 1 1 1 1 1
+        # 1 1 1 1 1
+        # 1 1 1 1 1
+        # 1 1 1 1 1
+        # 1 1 1 1 1
         draw_position = 0b111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111
         self.assertTrue(State.is_draw_state(draw_position))
 
     def test_is_not_draw(self):
+        # 1 0 1 1 1
+        # 1 1 1 1 1
+        # 1 1 1 1 1
+        # 1 1 1 1 1
+        # 1 1 1 1 1
+        # 1 1 1 1 1
+        # 1 1 1 1 1
+        # 1 1 1 1 1
+        draw_position = 0b111111110111111111111111111111111111111111111111111111111111111111111111111111111111111111111111
+        self.assertFalse(State.is_draw_state(draw_position))
+
+    def test_is_terminal_state_when_winning(self):
         # 0 0 0 0 0
         # 0 0 0 0 0
         # 0 0 0 0 0
@@ -146,8 +158,35 @@ class StateTest(unittest.TestCase):
         # 0 0 1 0 0
         # 0 1 0 0 0
         # 1 0 0 0 0
-        draw_position = 0b111111110111111111111111111111111111111111111111111111111111111111111111111111111111111111111111
-        self.assertFalse(State.is_draw_state(draw_position))
+        winning_position = 0b0000000100000010000001000000100000010000
+        state = State(ai_position=0, game_position=winning_position)
+        self.assertTrue(state.is_terminal_state())
+
+    def test_is_terminal_state_when_not_winning(self):
+        # 0 0 0 0 0
+        # 0 0 0 0 0
+        # 0 0 0 0 0
+        # 0 0 0 0 1
+        # 0 0 0 1 0
+        # 0 0 0 0 0
+        # 0 1 0 0 0
+        # 1 0 0 0 0
+        winning_position = 0b0000000100000010000000000000100000010000
+        state = State(ai_position=0, game_position=winning_position)
+        self.assertFalse(state.is_terminal_state())
+        
+    def test_is_terminal_state_when_draw(self):
+        # 1 1 1 1 1
+        # 1 1 1 1 1
+        # 1 1 1 1 1
+        # 1 1 1 1 1
+        # 1 1 1 1 1
+        # 1 1 1 1 1
+        # 1 1 1 1 1
+        # 1 1 1 1 1
+        winning_position = 0b111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111
+        state = State(ai_position=0, game_position=winning_position)
+        self.assertTrue(state.is_terminal_state())
 
     def test_ai_turn_two_times_in_same_row(self):
         ia_position_after_move = 0b00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000001
@@ -174,10 +213,18 @@ class StateTest(unittest.TestCase):
 
     def test_get_next_move(self):
         state = State(0, 0)
-        new_state = state.get_next_move(first_player=Player.IA)
-        new_state.print_board()
-        new_state = new_state.get_next_move(first_player=Player.HUMAN)
-        new_state.print_board()
+        for i in range(0, 8*12//2 - 1):
+            state = state.get_next_move(first_player=Player.IA)
+            state.print_board()
+            #print(bin(state.game_position))
+
+            ai_pos, pos, heights = state.play_turn(int(input("a toi")), first_player=Player.IA)
+            state = State(ai_pos, pos, heights)
+            #print(bin(state.game_position))
+
+
+
+
 
 if __name__ == '__main__':
     unittest.main()

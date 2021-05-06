@@ -3,12 +3,12 @@ from enum import Enum
 from Player import Player
 from colors import Colors
 
-BOARD_WIDTH = 12
+BOARD_WIDTH = 8
 BOARD_HEIGHT = 8
 MAX_MOVE_TO_WIN = BOARD_WIDTH * BOARD_HEIGHT // 2 + 1
 
 infinity = float('inf')
-MAX_DEPTH = 10
+MAX_DEPTH = 9
 
 
 class GameStatus(Enum):
@@ -59,10 +59,14 @@ class State:
 
     def is_terminal_state(self):
         if self.is_winning_state(self.ai_position):
+            self.game_status = GameStatus.AI_WIN
+            #self.print_board()
             return True
         elif self.is_winning_state(self.human_position):
+            self.game_status = GameStatus.HUMAN_WIN
             return True
         elif self.is_draw_state(self.game_position):
+            self.game_status = GameStatus.DRAW
             return True
         else:
             return False
@@ -111,9 +115,9 @@ class State:
         for row in range(BOARD_HEIGHT - 1, -1, -1):
             print("")
             for column in range(0, BOARD_WIDTH):
-                if ai_board & (1 << (BOARD_WIDTH * column + row)):
+                if ai_board & (1 << (BOARD_HEIGHT * column + row)):
                     print(Colors.FAIL.value + "1" + Colors.FAIL.value, end='')
-                elif total_board & (1 << (BOARD_WIDTH * column + row)):
+                elif total_board & (1 << (BOARD_HEIGHT * column + row)):
                     print(Colors.OKGREEN.value + "2" + Colors.OKGREEN.value, end='')
                 else:
                     print(Colors.OKCYAN.value + "0" + Colors.OKCYAN.value, end='')
@@ -129,20 +133,26 @@ class State:
             other.ai_position, other.game_position)
 
     def get_next_move(self, first_player):
+
         def alpha_beta_pruning(ai_state, ai_alpha, ai_beta, ai_max_depth):
-            if ai_state.is_terminal_state() or self.depth > ai_max_depth:
-                return ai_state.get_heuristic()
-            if self.depth % 2 == 1:
+
+            if ai_state.is_terminal_state() or ai_state.depth > ai_max_depth:
+                node_value = ai_state.get_heuristic()
+                return node_value
+            if ai_state.depth % 2 == 1:
+                print('min', ai_alpha, ai_beta, ai_state.depth)
                 w_value = infinity
                 for child in ai_state.get_children(first_player):
                     if child in known_states:
                         continue
-                    w_value = min(w_value, alpha_beta_pruning(child, ai_alpha, ai_beta, ai_max_depth))
+                    alpha_beta_result = alpha_beta_pruning(child, ai_alpha, ai_beta, ai_max_depth)
+                    w_value = min(w_value, alpha_beta_result)
                     known_states[child] = w_value
                     if ai_alpha >= w_value:
                         return w_value
                     ai_beta = min(ai_beta, w_value)
             else:
+                print('max', ai_alpha, ai_beta, ai_state.depth)
                 w_value = -infinity
                 for child in ai_state.get_children(first_player):
                     if child in known_states:
