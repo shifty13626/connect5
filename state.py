@@ -1,4 +1,5 @@
 from enum import Enum
+from colors import Colors
 
 BOARD_WIDTH = 12
 BOARD_HEIGHT = 8
@@ -93,11 +94,13 @@ class State:
             print("")
             for column in range(0, BOARD_WIDTH):
                 if ai_board & (1 << (BOARD_WIDTH * column + row)):
-                    print("1 ", end='')
+                    print(Colors.FAIL.value +"1" +Colors.FAIL.value, end='')
                 elif total_board & (1 << (BOARD_WIDTH * column + row)):
-                    print("2 ", end='')
+                    print(Colors.OKGREEN.value +"2" +Colors.OKGREEN.value, end='')
                 else:
-                    print("0 ", end='')
+                    print(Colors.OKCYAN.value + "0" +Colors.OKCYAN.value, end='')
+                if 0 <= column < 11:
+                    print(" | ", end='')
         print("")
 
     def __hash__(self):
