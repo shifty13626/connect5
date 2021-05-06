@@ -73,7 +73,7 @@ class StateTest(unittest.TestCase):
         # 0 0 1 0 0
         # 0 0 0 1 0
         # 0 0 0 0 1
-        winning_position = 0b0001000000001000000001000000001000000001   # 5 coin in last line (bottom)
+        winning_position = 0b00010000_0000100_000000100_00000010_00000001   # 5 coin in last line (bottom)
         self.assertTrue(State.is_winning_state(winning_position))
 
     def test_no_winner_diagonal_lr(self):
@@ -148,13 +148,6 @@ class StateTest(unittest.TestCase):
         draw_position = 0b111111110111111111111111111111111111111111111111111111111111111111111111111111111111111111111111
         self.assertFalse(State.is_draw_state(draw_position))
 
-
-#     def test_conversion(self):
-#         board_matrix = [[0 for x in range(w)] for y in range(h)]
-#         get_bit_board(board_matrix)
-#
-# def get_bit_board(matrice):
-#     print(matrice)
 
 if __name__ == '__main__':
     unittest.main()

@@ -11,7 +11,7 @@ class State:
         self.game_position = game_position
 
     @property
-    def player_position(self):
+    def human_position(self):
         return self.ai_position ^ self.game_position
 
     @staticmethod
@@ -47,6 +47,7 @@ class State:
     def get_heuristic(self):
         # TODO
         return 42
+
     def get_children(self):
         # TODO
         return self
