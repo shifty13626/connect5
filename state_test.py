@@ -172,7 +172,7 @@ class StateTest(unittest.TestCase):
         expected = []
         self.assertEqual(expected, state.get_possible_moves())
 
-    def test_get_next_mobe(self):
+    def test_get_next_move(self):
         state = State(0, 0)
         new_state = state.get_next_move(first_player=Player.IA)
         new_state.print_board()

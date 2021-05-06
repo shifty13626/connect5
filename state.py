@@ -83,7 +83,8 @@ class State:
         children = []
         for possible_move in self.get_possible_moves():
             new_ai_position, new_game_position, new_col_heights = self.play_turn(possible_move, first_player)
-            children.append(State(new_ai_position, new_game_position, new_col_heights, self.depth + 1))
+            new_state = State(new_ai_position, new_game_position, new_col_heights, self.depth + 1)
+            children.append(new_state)
         return children
 
     def get_possible_moves(self):
@@ -159,7 +160,8 @@ class State:
         best_score = -infinity
         for state in self.get_children(first_player):
             v = alpha_beta_pruning(state, -infinity, infinity, MAX_DEPTH)
-            if v > best_score:
+            if v >= best_score:
                 best_score = v
                 best_state = state
+        print(len(known_states))
         return best_state
