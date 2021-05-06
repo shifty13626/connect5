@@ -22,6 +22,7 @@ class State:
         self.ai_position = ai_position
         self.game_position = game_position
         self.depth = depth
+        self.col_heights = [i * BOARD_HEIGHT for i in range(0, BOARD_WIDTH)]
 
     @property
     def human_position(self):
@@ -72,9 +73,19 @@ class State:
         else:
             return -infinity
 
-    def get_children(self):
-        # TODO
-        return self
+    def get_children(self, who_went_first):
+        pass
+
+    def get_possible_moves(self):
+        for i in range(0, BOARD_WIDTH):
+            pass
+
+    def play_turn(self, col, ai_turn):
+        token = 1 << self.col_heights[col]
+        self.col_heights[col] += 1
+        self.game_position ^= token
+        if ai_turn:
+            self.ai_position ^= token
 
     def print_board(self):
         ai_board, total_board = self.ai_position, self.game_position

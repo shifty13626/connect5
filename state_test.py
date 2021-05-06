@@ -148,6 +148,38 @@ class StateTest(unittest.TestCase):
         draw_position = 0b111111110111111111111111111111111111111111111111111111111111111111111111111111111111111111111111
         self.assertFalse(State.is_draw_state(draw_position))
 
+    def test_ai_turn_two_times_in_same_row(self):
+        ia_position_after_move = 0b00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000001
+        state = State(0, 0)
+        state.play_turn(0, ai_turn=True)
+        self.assertEqual(ia_position_after_move, state.ai_position)
+        position_after_second_move = 0b00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000001_00000001
+        state.play_turn(1, ai_turn=True)
+        self.assertEqual(position_after_second_move, state.ai_position)
+
+    def test_play_turn_two_times_in_same_column(self):
+        ia_position_after_move = 0b00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000011
+        state = State(0, 0)
+        state.play_turn(0, ai_turn=True)
+        state.play_turn(0, ai_turn=True)
+        self.assertEqual(ia_position_after_move, state.ai_position)
+
+    def test_human_turn_two_times_in_same_row(self):
+        human_position_after_move = 0b00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000001
+        state = State(0, 0)
+        state.play_turn(0, ai_turn=False)
+        self.assertEqual(human_position_after_move, state.human_position)
+        position_after_second_move = 0b00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000001_00000001
+        state.play_turn(1, ai_turn=False)
+        self.assertEqual(position_after_second_move, state.human_position)
+
+    def test_human_turn_two_times_in_same_column(self):
+        human_position_after_move = 0b00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000011
+        state = State(0, 0)
+        state.play_turn(0, ai_turn=False)
+        state.play_turn(0, ai_turn=False)
+        self.assertEqual(human_position_after_move, state.human_position)
+
 
 if __name__ == '__main__':
     unittest.main()
