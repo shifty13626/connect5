@@ -1,4 +1,6 @@
 from enum import Enum
+
+from Player import Player
 from colors import Colors
 
 BOARD_WIDTH = 12
@@ -19,11 +21,13 @@ class GameStatus(Enum):
 class State:
     game_status = GameStatus.NOT_ENDED
 
-    def __init__(self, ai_position, game_position, depth=0):
+    def __init__(self, ai_position, game_position, col_heights=None, depth=0):
+        if col_heights is None:
+            col_heights = [i * BOARD_HEIGHT for i in range(0, BOARD_WIDTH)]
         self.ai_position = ai_position
         self.game_position = game_position
         self.depth = depth
-        self.col_heights = [i * BOARD_HEIGHT for i in range(0, BOARD_WIDTH)]
+        self.col_heights = col_heights
 
     @property
     def human_position(self):
@@ -47,6 +51,7 @@ class State:
     @staticmethod
     def is_draw_state(position):
         is_draw = True
+        # check that each column is not full
         for column in range(0, BOARD_WIDTH):
             if not (position & (1 << BOARD_HEIGHT * column + (BOARD_HEIGHT - 1))):
                 is_draw = False
@@ -74,19 +79,31 @@ class State:
         else:
             return -infinity
 
-    def get_children(self, who_went_first):
-        pass
+    def get_children(self, first_player):
+        children = []
+        for possible_move in self.get_possible_moves():
+            new_ai_position, new_game_position, new_col_heights = self.play_turn(possible_move, first_player)
+            children.append(State(new_ai_position, new_game_position, new_col_heights, self.depth + 1))
+        return children
 
     def get_possible_moves(self):
-        for i in range(0, BOARD_WIDTH):
-            pass
+        possible_moves = []
+        for column in range(0, BOARD_WIDTH):
+            # si la derniere ligne de la colonne est vide alors on l'enregistre
+            if not (self.game_position & (1 << BOARD_HEIGHT * column + (BOARD_HEIGHT - 1))):
+                possible_moves.append(column)
+        return possible_moves
 
-    def play_turn(self, col, ai_turn):
+    def play_turn(self, col, first_player):
         token = 1 << self.col_heights[col]
-        self.col_heights[col] += 1
-        self.game_position ^= token
-        if ai_turn:
-            self.ai_position ^= token
+        new_col_heights = self.col_heights.copy()
+        new_col_heights[col] += 1
+        new_game_position = self.game_position ^ token
+        new_ai_position = self.ai_position
+        if (first_player == Player.IA and self.depth % 2 == 0) or (
+                first_player == Player.HUMAN and self.depth % 2 == 1):
+            new_ai_position ^= token
+        return new_ai_position, new_game_position, new_col_heights
 
     def print_board(self):
         ai_board, total_board = self.ai_position, self.game_position
@@ -94,11 +111,11 @@ class State:
             print("")
             for column in range(0, BOARD_WIDTH):
                 if ai_board & (1 << (BOARD_WIDTH * column + row)):
-                    print(Colors.FAIL.value +"1" +Colors.FAIL.value, end='')
+                    print(Colors.FAIL.value + "1" + Colors.FAIL.value, end='')
                 elif total_board & (1 << (BOARD_WIDTH * column + row)):
-                    print(Colors.OKGREEN.value +"2" +Colors.OKGREEN.value, end='')
+                    print(Colors.OKGREEN.value + "2" + Colors.OKGREEN.value, end='')
                 else:
-                    print(Colors.OKCYAN.value + "0" +Colors.OKCYAN.value, end='')
+                    print(Colors.OKCYAN.value + "0" + Colors.OKCYAN.value, end='')
                 if 0 <= column < 11:
                     print(" | ", end='')
         print("")
@@ -110,38 +127,38 @@ class State:
         return (self.ai_position, self.game_position) == (
             other.ai_position, other.game_position)
 
-    def get_next_move(self):
-
-        def alpha_beta_pruning(ai_state, ai_alpha, ai_beta, ai_depth, ai_max_depth):
-            if ai_state.is_terminal_state() or ai_depth > ai_max_depth:
+    def get_next_move(self, first_player):
+        def alpha_beta_pruning(ai_state, ai_alpha, ai_beta, ai_max_depth):
+            if ai_state.is_terminal_state() or self.depth > ai_max_depth:
                 return ai_state.get_heuristic()
-            if ai_depth % 2 == 0:
+            if self.depth % 2 == 1:
                 w_value = infinity
-                for child in ai_state.get_children():
+                for child in ai_state.get_children(first_player):
                     if child in known_states:
                         continue
-                    w_value = min(w_value, alpha_beta_pruning(child, ai_alpha, ai_beta, ai_depth + 1, ai_max_depth))
+                    w_value = min(w_value, alpha_beta_pruning(child, ai_alpha, ai_beta, ai_max_depth))
                     known_states[child] = w_value
                     if ai_alpha >= w_value:
                         return w_value
                     ai_beta = min(ai_beta, w_value)
             else:
                 w_value = -infinity
-                for child in ai_state.get_children():
+                for child in ai_state.get_children(first_player):
                     if child in known_states:
                         continue
-                    w_value = max(w_value, alpha_beta_pruning(child, ai_alpha, ai_beta, ai_depth + 1, ai_max_depth))
+                    w_value = max(w_value, alpha_beta_pruning(child, ai_alpha, ai_beta, ai_max_depth))
                     known_states[child] = ai_alpha
                     if w_value >= ai_beta:
                         return w_value
-                    ai_alpha = min(ai_alpha, w_value)
+                    ai_alpha = max(ai_alpha, w_value)
             return w_value
 
+        self.depth = 0
         known_states = {}
         best_state = None
         best_score = -infinity
-        for state in self.get_children():
-            v = alpha_beta_pruning(state, -infinity, infinity, 1, MAX_DEPTH)
+        for state in self.get_children(first_player):
+            v = alpha_beta_pruning(state, -infinity, infinity, MAX_DEPTH)
             if v > best_score:
                 best_score = v
                 best_state = state

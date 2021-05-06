@@ -1,6 +1,7 @@
 import unittest
 
-from state import State
+from Player import Player
+from state import State, BOARD_WIDTH
 
 
 class StateTest(unittest.TestCase):
@@ -151,35 +152,32 @@ class StateTest(unittest.TestCase):
     def test_ai_turn_two_times_in_same_row(self):
         ia_position_after_move = 0b00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000001
         state = State(0, 0)
-        state.play_turn(0, ai_turn=True)
-        self.assertEqual(ia_position_after_move, state.ai_position)
-        position_after_second_move = 0b00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000001_00000001
-        state.play_turn(1, ai_turn=True)
-        self.assertEqual(position_after_second_move, state.ai_position)
-
-    def test_play_turn_two_times_in_same_column(self):
-        ia_position_after_move = 0b00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000011
-        state = State(0, 0)
-        state.play_turn(0, ai_turn=True)
-        state.play_turn(0, ai_turn=True)
-        self.assertEqual(ia_position_after_move, state.ai_position)
+        new_ai_position, new_game_position, new_col_heights = state.play_turn(0, first_player=Player.IA)
+        self.assertEqual(ia_position_after_move, new_ai_position)
 
     def test_human_turn_two_times_in_same_row(self):
         human_position_after_move = 0b00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000001
         state = State(0, 0)
-        state.play_turn(0, ai_turn=False)
-        self.assertEqual(human_position_after_move, state.human_position)
-        position_after_second_move = 0b00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000001_00000001
-        state.play_turn(1, ai_turn=False)
-        self.assertEqual(position_after_second_move, state.human_position)
+        new_ai_position, new_game_position, new_col_heights = state.play_turn(0, first_player=Player.HUMAN)
+        self.assertEqual(human_position_after_move, new_ai_position ^ new_game_position)
 
-    def test_human_turn_two_times_in_same_column(self):
-        human_position_after_move = 0b00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000011
+    def test_get_possible_move_empty_board(self):
         state = State(0, 0)
-        state.play_turn(0, ai_turn=False)
-        state.play_turn(0, ai_turn=False)
-        self.assertEqual(human_position_after_move, state.human_position)
+        expected = [i for i in range(0, BOARD_WIDTH)]
+        self.assertEqual(expected, state.get_possible_moves())
 
+    def test_get_possible_move_with_full_board(self):
+        position = 0b11111111_11111111_11111111_11111111_11111111_11111111_11111111_11111111_11111111_11111111_11111111_11111111
+        state = State(position, position)
+        expected = []
+        self.assertEqual(expected, state.get_possible_moves())
+
+    def test_get_next_mobe(self):
+        state = State(0, 0)
+        new_state = state.get_next_move(first_player=Player.IA)
+        new_state.print_board()
+        new_state = new_state.get_next_move(first_player=Player.HUMAN)
+        new_state.print_board()
 
 if __name__ == '__main__':
     unittest.main()

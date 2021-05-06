@@ -1,15 +1,11 @@
 from enum import Enum
+
+from Player import Player
 from state import State
 from colors import Colors
 
 BOARD_WIDTH = 12
 BOARD_HEIGHT = 8
-
-
-class Player(Enum):
-    PLAYER = -1
-    IA = 1
-
 
 class Game:
     def start_game(self):
@@ -34,10 +30,11 @@ class Game:
                     if column_selected >= 1 and column_selected <= 12:
                         column_selected = column_selected - 1
                         entry = True
-
+                #TODO HUMAN play
                 current_player = Player.IA
             # if IA
             else:
+                #TODO AI play
                 print(Colors.HEADER.value + "L'IA vient de jouer" +Colors.HEADER.value)
                 current_player = Player.PLAYER
 
