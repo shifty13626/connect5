@@ -1,14 +1,27 @@
+from enum import Enum
+
 BOARD_WIDTH = 12
 BOARD_HEIGHT = 8
+MAX_MOVE_TO_WIN = BOARD_WIDTH * BOARD_HEIGHT // 2 + 1
 
 infinity = float('inf')
 MAX_DEPTH = 10
 
 
+class GameStatus(Enum):
+    AI_WIN = -1
+    HUMAN_WIN = 1
+    DRAW = 0
+    NOT_ENDED = 2
+
+
 class State:
-    def __init__(self, ai_position, game_position):
+    game_status = GameStatus.NOT_ENDED
+
+    def __init__(self, ai_position, game_position, depth=0):
         self.ai_position = ai_position
         self.game_position = game_position
+        self.depth = depth
 
     @property
     def human_position(self):
@@ -16,11 +29,14 @@ class State:
 
     @staticmethod
     def is_winning_state(position):
-        if position & (position >> (BOARD_HEIGHT - 1)) & (position >> ((BOARD_HEIGHT - 1) * 2)) & ((BOARD_HEIGHT - 1) * 3) & (position >> ((BOARD_HEIGHT - 1) * 4)) != 0:
+        if position & (position >> (BOARD_HEIGHT - 1)) & (position >> ((BOARD_HEIGHT - 1) * 2)) & (
+                (BOARD_HEIGHT - 1) * 3) & (position >> ((BOARD_HEIGHT - 1) * 4)) != 0:
             return True  # diagonal \
-        if position & (position >> (BOARD_HEIGHT + 1)) & (position >> ((BOARD_HEIGHT + 1) * 2)) & (position >> ((BOARD_HEIGHT + 1) * 3)) & (position >> ((BOARD_HEIGHT + 1) * 4)) != 0:
+        if position & (position >> (BOARD_HEIGHT + 1)) & (position >> ((BOARD_HEIGHT + 1) * 2)) & (
+                position >> ((BOARD_HEIGHT + 1) * 3)) & (position >> ((BOARD_HEIGHT + 1) * 4)) != 0:
             return True  # diagonal /
-        if position & (position >> BOARD_HEIGHT) & (position >> (BOARD_HEIGHT * 2)) & (position >> (BOARD_HEIGHT * 3)) & (position >> (BOARD_HEIGHT * 4)) != 0:
+        if position & (position >> BOARD_HEIGHT) & (position >> (BOARD_HEIGHT * 2)) & (
+                position >> (BOARD_HEIGHT * 3)) & (position >> (BOARD_HEIGHT * 4)) != 0:
             return True  # horizontal
         if position & (position >> 1) & (position >> 2) & (position >> 3) & (position >> 4) != 0:
             return True  # vertical
@@ -45,8 +61,16 @@ class State:
             return False
 
     def get_heuristic(self):
-        # TODO
-        return 42
+        if self.game_status == GameStatus.AI_WIN:
+            return MAX_MOVE_TO_WIN - self.depth // 2
+        elif self.game_status == GameStatus.HUMAN_WIN:
+            return - (MAX_MOVE_TO_WIN - self.depth // 2)
+        elif self.game_status == GameStatus.DRAW:
+            return 0
+        elif self.depth % 2 == 0:
+            return infinity
+        else:
+            return -infinity
 
     def get_children(self):
         # TODO
@@ -54,7 +78,7 @@ class State:
 
     def print_board(self):
         ai_board, total_board = self.ai_position, self.game_position
-        for row in range(BOARD_HEIGHT-1, -1, -1):
+        for row in range(BOARD_HEIGHT - 1, -1, -1):
             print("")
             for column in range(0, BOARD_WIDTH):
                 if ai_board & (1 << (BOARD_WIDTH * column + row)):
