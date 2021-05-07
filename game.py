@@ -1,5 +1,3 @@
-from enum import Enum
-
 from Player import Player
 from state import State, BOARD_WIDTH
 from colors import Colors
@@ -44,7 +42,7 @@ class Game:
         elif self.state.is_winning_state(self.state.ai_position):
             print(Colors.FAIL.value + "Vous avez perdu..." + Colors.ENDC.value)
         else:
-            print(Colors.FAIL.value + "Égalité !" + Colors.ENDC.value)
+            print(Colors.WARNING.value + "Égalité !" + Colors.ENDC.value)
 
     def is_valid_entry(self, entry):
         if entry in self.state.get_possible_moves():
