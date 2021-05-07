@@ -8,7 +8,6 @@ BOARD_HEIGHT = 9
 MAX_MOVE_TO_WIN = (BOARD_WIDTH * (BOARD_HEIGHT - 1) // 2 + 1) + 10000
 
 infinity = float('inf')
-MAX_DEPTH = 6
 
 heuristic_values = [
     3,  4,  5,  6,  6,  5,  4, 3,
@@ -215,7 +214,6 @@ class State:
 
     def print_board(self):
         ai_board, total_board = self.ai_position, self.game_position
-        print("0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 |")
         for row in range(BOARD_HEIGHT - 2, -1, -1):
             for column in range(0, BOARD_WIDTH):
                 if ai_board & (1 << (BOARD_HEIGHT * column + row)):
@@ -235,7 +233,7 @@ class State:
         return (self.ai_position, self.game_position) == (
             other.ai_position, other.game_position)
 
-    def get_next_move(self, first_player):
+    def get_next_move(self, first_player, max_depth):
 
         def alpha_beta_pruning(ai_state, ai_alpha, ai_beta, ai_max_depth):
 
@@ -275,9 +273,10 @@ class State:
         best_state = None
         best_score = -infinity
         for state in self.get_children(first_player):
-            v = alpha_beta_pruning(state, -infinity, infinity, MAX_DEPTH)
+            v = alpha_beta_pruning(state, -infinity, infinity, max_depth)
             if v >= best_score:
                 best_score = v
                 best_state = state
-        print(len(known_states))
+        print("Profondeur :", max_depth, "| Possibilités :", len(known_states))
         return best_state
+

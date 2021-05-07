@@ -1,7 +1,7 @@
 import unittest
 import winsound
 from Player import Player
-from state import State, BOARD_WIDTH, BOARD_HEIGHT
+from state import State, BOARD_WIDTH, BOARD_HEIGHT, MAX_DEPTH
 
 
 class StateTest(unittest.TestCase):
