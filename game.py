@@ -2,7 +2,8 @@ from Player import Player
 from state import State, BOARD_WIDTH
 from colors import Colors
 
-NUMBER_OF_TURNS_BEFORE_INCREMENTING_DEPTH = 6
+NUMBER_OF_TURNS_BEFORE_INCREMENTING_DEPTH = 12
+
 
 class Game:
     def __init__(self, max_depth=4):
@@ -35,6 +36,7 @@ class Game:
                 print(Colors.HEADER.value + "L'IA vient de jouer" + Colors.ENDC.value)
                 self.current_player = Player.HUMAN
             turn_count += 1
+            print()
         # end game
         self.state.print_board()
         if self.state.is_winning_state(self.state.human_position):
@@ -51,5 +53,5 @@ class Game:
 
 
 if __name__ == '__main__':
-    game = Game(max_depth=5)
+    game = Game()
     game.start_game()
