@@ -36,6 +36,7 @@ class Game:
                 self.state = self.state.get_next_move(first_player=Player.IA, max_depth=self.max_depth)
                 print(Colors.HEADER.value + "L'IA vient de jouer" + Colors.ENDC.value)
                 self.current_player = Player.HUMAN
+            turn_count += 1
         # end game
         self.state.print_board()
         if self.state.is_winning_state(self.state.human_position):
