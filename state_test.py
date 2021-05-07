@@ -1,5 +1,5 @@
 import unittest
-
+import winsound
 from Player import Player
 from state import State, BOARD_WIDTH, BOARD_HEIGHT
 
@@ -212,17 +212,27 @@ class StateTest(unittest.TestCase):
         expected = []
         self.assertEqual(expected, state.get_possible_moves())
 
-    @unittest.skip("just for demo")
     def test_get_next_move(self):
         state = State(0, 0)
-        for i in range(0, 8*12//2 - 1):
-            state = state.get_next_move(first_player=Player.IA)
+        for i in range(0, 8*8//2 - 1):
             state.print_board()
-            print(bin(state.ai_position))
+            if state.is_terminal_state():
+                break
+            state = state.get_next_move(first_player=Player.IA)
 
+            state.print_board()
+            if state.is_terminal_state():
+                break
             ai_pos, pos, heights = state.play_turn(int(input("a toi")), first_player=Player.IA)
             state = State(ai_pos, pos, heights)
-            #print(bin(state.game_position))
+            # if state.is_terminal_state():
+            #     break
+            # state = state.get_next_move(first_player=Player.IA)
+            # state.print_board()
+            # print(bin(state.ai_position))
+
+            # print('\a')
+
 
     @unittest.skip("just for demo")
     def test_get_heuristic_values(self):

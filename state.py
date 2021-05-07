@@ -3,22 +3,22 @@ from enum import Enum
 from Player import Player
 from colors import Colors
 
-BOARD_WIDTH = 8
+BOARD_WIDTH = 12
 BOARD_HEIGHT = 9
-MAX_MOVE_TO_WIN = BOARD_WIDTH * (BOARD_HEIGHT - 1) // 2 + 1
+MAX_MOVE_TO_WIN = (BOARD_WIDTH * (BOARD_HEIGHT - 1) // 2 + 1) + 10000
 
 infinity = float('inf')
-MAX_DEPTH = 9
+MAX_DEPTH = 6
 
 heuristic_values = [
     3,  4,  5,  6,  6,  5,  4, 3,
     4,  6,  7,  9,  9,  7,  6, 4,
     5,  7, 10, 12, 12, 10,  7, 5,
     6,  9, 13, 14, 14, 13,  9, 6,
-    # 8, 11, 14, 16, 16, 14, 11, 8,
-    # 8, 11, 14, 16, 16, 14, 11, 8,
-    # 8, 11, 14, 16, 16, 14, 11, 8,
-    # 8, 11, 14, 16, 16, 14, 11, 8,
+    8, 11, 14, 16, 16, 14, 11, 8,
+    8, 11, 14, 16, 16, 14, 11, 8,
+    8, 11, 14, 16, 16, 14, 11, 8,
+    8, 11, 14, 16, 16, 14, 11, 8,
     6,  9, 13, 14, 14, 13,  9, 6,
     5,  7, 10, 12, 12, 10,  7, 5,
     4,  6,  7,  9,  9,  7,  6, 4,
@@ -175,6 +175,25 @@ class State:
                 human_score += ((self.human_position >> shift) & 1) * value
             return ai_score - human_score
 
+    def get_heuristic_v3(self):
+        if self.game_status == GameStatus.AI_WIN:
+            return MAX_MOVE_TO_WIN - self.depth
+        elif self.game_status == GameStatus.HUMAN_WIN:
+            return - (MAX_MOVE_TO_WIN - self.depth)
+        elif self.game_status == GameStatus.DRAW:
+            return 0
+        else:
+            length = BOARD_WIDTH * (BOARD_HEIGHT - 1)
+            ai_score = 0
+            human_score = 0
+            for key, value in enumerate(heuristic_values):
+                shift = length - key - 1
+                # ai_score += ((self.ai_position & (1 << shift)) >> shift) * value
+                # human_score += ((self.human_position & (1 << shift))  >> shift) * value
+                ai_score += ((self.ai_position >> shift) & 1) * value
+                human_score += ((self.human_position >> shift) & 1) * value
+            return ai_score - human_score
+
     def get_possible_moves(self):
         possible_moves = []
         for column in range(0, BOARD_WIDTH):
@@ -221,7 +240,7 @@ class State:
         def alpha_beta_pruning(ai_state, ai_alpha, ai_beta, ai_max_depth):
 
             if ai_state.is_terminal_state() or ai_state.depth > ai_max_depth:
-                node_value = ai_state.get_heuristic_v2()
+                node_value = ai_state.get_heuristic_v3()
                 return node_value
             # MinimizingPlayer
             if ai_state.depth % 2 == 1:
