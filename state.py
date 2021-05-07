@@ -4,8 +4,8 @@ from Player import Player
 from colors import Colors
 
 BOARD_WIDTH = 8
-BOARD_HEIGHT = 8
-MAX_MOVE_TO_WIN = BOARD_WIDTH * BOARD_HEIGHT // 2 + 1
+BOARD_HEIGHT = 9
+MAX_MOVE_TO_WIN = BOARD_WIDTH * (BOARD_HEIGHT - 1) // 2 + 1
 
 infinity = float('inf')
 MAX_DEPTH = 9
@@ -49,11 +49,40 @@ class State:
         return False
 
     @staticmethod
+    def get_score_four(position):
+        score = 0
+        if position & (position >> (BOARD_HEIGHT - 1)) & (position >> ((BOARD_HEIGHT - 1) * 2)) & (
+                (BOARD_HEIGHT - 1) * 3) != 0:
+            score += 8
+        if position & (position >> (BOARD_HEIGHT + 1)) & (position >> ((BOARD_HEIGHT + 1) * 2)) & (
+                position >> ((BOARD_HEIGHT + 1) * 3)) != 0:
+            score += 8
+        if position & (position >> BOARD_HEIGHT) & (position >> (BOARD_HEIGHT * 2)) & (
+                position >> (BOARD_HEIGHT * 3)) != 0:
+            score += 8
+        if position & (position >> 1) & (position >> 2) & (position >> 3) != 0:
+            score += 8
+        return score
+
+    @staticmethod
+    def get_score_three(position):
+        score = 0
+        if position & (position >> (BOARD_HEIGHT - 1)) & (position >> ((BOARD_HEIGHT - 1) * 2)) != 0:
+            score += 2
+        if position & (position >> (BOARD_HEIGHT + 1)) & (position >> ((BOARD_HEIGHT + 1) * 2)) != 0:
+            score += 2
+        if position & (position >> BOARD_HEIGHT) & (position >> (BOARD_HEIGHT * 2)) != 0:
+            score += 2
+        if position & (position >> 1) & (position >> 2) != 0:
+            score += 2
+        return score
+
+    @staticmethod
     def is_draw_state(position):
         is_draw = True
         # check that each column is not full
         for column in range(0, BOARD_WIDTH):
-            if not (position & (1 << BOARD_HEIGHT * column + (BOARD_HEIGHT - 1))):
+            if not (position & (1 << BOARD_HEIGHT * column + (BOARD_HEIGHT - 2))):
                 is_draw = False
         return is_draw
 
@@ -73,15 +102,17 @@ class State:
 
     def get_heuristic(self):
         if self.game_status == GameStatus.AI_WIN:
-            return MAX_MOVE_TO_WIN - self.depth // 2
+            return infinity
         elif self.game_status == GameStatus.HUMAN_WIN:
-            return - (MAX_MOVE_TO_WIN - self.depth // 2)
+            return -infinity
         elif self.game_status == GameStatus.DRAW:
             return 0
         elif self.depth % 2 == 0:
-            return infinity
+            # return MAX_MOVE_TO_WIN - self.depth
+            return self.get_score_four(self.ai_position) + self.get_score_three(self.ai_position) - (self.get_score_four(self.human_position) + self.get_score_three(self.human_position))
         else:
-            return -infinity
+            # return - (MAX_MOVE_TO_WIN - self.depth)
+            return - (self.get_score_four(self.human_position) + self.get_score_three(self.human_position)) + (self.get_score_four(self.ai_position) + self.get_score_three(self.ai_position))
 
     def get_children(self, first_player):
         children = []
@@ -95,7 +126,7 @@ class State:
         possible_moves = []
         for column in range(0, BOARD_WIDTH):
             # si la derniere ligne de la colonne est vide alors on l'enregistre
-            if not (self.game_position & (1 << BOARD_HEIGHT * column + (BOARD_HEIGHT - 1))):
+            if not (self.game_position & (1 << BOARD_HEIGHT * column + (BOARD_HEIGHT - 2))):
                 possible_moves.append(column)
         return possible_moves
 
@@ -112,8 +143,8 @@ class State:
 
     def print_board(self):
         ai_board, total_board = self.ai_position, self.game_position
-        for row in range(BOARD_HEIGHT - 1, -1, -1):
-            print("")
+        print("0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 |")
+        for row in range(BOARD_HEIGHT - 2, -1, -1):
             for column in range(0, BOARD_WIDTH):
                 if ai_board & (1 << (BOARD_HEIGHT * column + row)):
                     print(Colors.FAIL.value + "1" + Colors.FAIL.value, end='')
@@ -122,8 +153,8 @@ class State:
                 else:
                     print(Colors.OKCYAN.value + "0" + Colors.OKCYAN.value, end='')
                 if 0 <= column < 11:
-                    print(" | ", end='')
-        print("")
+                    print(Colors.OKCYAN.value + " | " + Colors.OKCYAN.value, end='')
+            print()
 
     def __hash__(self):
         return hash((self.ai_position, self.game_position))
@@ -139,30 +170,35 @@ class State:
             if ai_state.is_terminal_state() or ai_state.depth > ai_max_depth:
                 node_value = ai_state.get_heuristic()
                 return node_value
+            # MinimizingPlayer
             if ai_state.depth % 2 == 1:
-                print('min', ai_alpha, ai_beta, ai_state.depth)
+                # print('min', ai_alpha, ai_beta, ai_state.depth)
                 w_value = infinity
                 for child in ai_state.get_children(first_player):
-                    if child in known_states:
-                        continue
-                    alpha_beta_result = alpha_beta_pruning(child, ai_alpha, ai_beta, ai_max_depth)
-                    w_value = min(w_value, alpha_beta_result)
-                    known_states[child] = w_value
-                    if ai_alpha >= w_value:
-                        return w_value
+                    if child not in known_states:
+                        w_value = min(w_value, alpha_beta_pruning(child, ai_alpha, ai_beta, ai_max_depth))
+                        known_states[child] = w_value
+                    else:
+                        w_value = known_states[child]
                     ai_beta = min(ai_beta, w_value)
+                    if ai_alpha >= ai_beta:
+                        break
+                return w_value
+
+            # MaximizingPlayer
             else:
-                print('max', ai_alpha, ai_beta, ai_state.depth)
+                # print('max', ai_alpha, ai_beta, ai_state.depth)
                 w_value = -infinity
                 for child in ai_state.get_children(first_player):
-                    if child in known_states:
-                        continue
-                    w_value = max(w_value, alpha_beta_pruning(child, ai_alpha, ai_beta, ai_max_depth))
-                    known_states[child] = ai_alpha
-                    if w_value >= ai_beta:
-                        return w_value
+                    if child not in known_states:
+                        w_value = max(w_value, alpha_beta_pruning(child, ai_alpha, ai_beta, ai_max_depth))
+                        known_states[child] = w_value
+                    else:
+                        w_value = known_states[child]
                     ai_alpha = max(ai_alpha, w_value)
-            return w_value
+                    if ai_alpha >= ai_beta:
+                        break
+                return w_value
 
         self.depth = 0
         known_states = {}

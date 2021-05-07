@@ -14,7 +14,7 @@ class StateTest(unittest.TestCase):
         # 0 0 0 0 0
         # 0 0 0 0 0
         # 0 0 0 0 0
-        winning_position = 0b1000000010000000100000001000000010000000   # 5 coin in last line (bottom)
+        winning_position = 0b1000000001000000001000000001000000001_00000000   # 5 coin in last line (bottom)
         self.assertTrue(State.is_winning_state(winning_position))
 
     def test_no_winner_horizontal(self):
@@ -54,15 +54,15 @@ class StateTest(unittest.TestCase):
         self.assertTrue(State.is_winning_state(winning_position))
 
     def test_no_winner_vertical(self):
-        # 0 0 0 0 1
-        # 0 0 0 0 1
+        # 1 0 0 0 1
+        # 1 0 0 0 1
         # 0 0 0 0 0
         # 0 0 0 0 1
         # 0 0 0 0 1
-        # 0 0 0 0 0
-        # 0 0 0 0 0
-        # 0 0 0 0 0
-        winning_position = 0b0000000011011000
+        # 0 1 0 0 0
+        # 0 1 0 0 0
+        # 0 1 0 0 0
+        winning_position = 0b11101111000000011000000000000000000000001000000000000000000000000000000
         self.assertFalse(State.is_winning_state(winning_position))
 
     def test_winner_diagonal_lr(self):
@@ -110,7 +110,7 @@ class StateTest(unittest.TestCase):
         # 0 0 1 0 0
         # 0 1 0 0 0
         # 1 0 0 0 0
-        winning_position = 0b0000000100000010000001000000100000010000   # 5 coin in last line (bottom)
+        winning_position = 0b000000001000000010000000100000001000000010000   # 5 coin in last line (bottom)
         self.assertTrue(State.is_winning_state(winning_position))
 
     def test_no_winner_diagonal_rl(self):
@@ -146,7 +146,7 @@ class StateTest(unittest.TestCase):
         # 1 1 1 1 1
         # 1 1 1 1 1
         # 1 1 1 1 1
-        draw_position = 0b111111110111111111111111111111111111111111111111111111111111111111111111111111111111111111111111
+        draw_position = 0b011111111_00111111_011111111_011111111
         self.assertFalse(State.is_draw_state(draw_position))
 
     def test_is_terminal_state_when_winning(self):
@@ -158,7 +158,7 @@ class StateTest(unittest.TestCase):
         # 0 0 1 0 0
         # 0 1 0 0 0
         # 1 0 0 0 0
-        winning_position = 0b0000000100000010000001000000100000010000
+        winning_position = 0b000000001000000010000000100000001000000010000
         state = State(ai_position=0, game_position=winning_position)
         self.assertTrue(state.is_terminal_state())
 
@@ -216,7 +216,7 @@ class StateTest(unittest.TestCase):
         for i in range(0, 8*12//2 - 1):
             state = state.get_next_move(first_player=Player.IA)
             state.print_board()
-            #print(bin(state.game_position))
+            print(bin(state.ai_position))
 
             ai_pos, pos, heights = state.play_turn(int(input("a toi")), first_player=Player.IA)
             state = State(ai_pos, pos, heights)
