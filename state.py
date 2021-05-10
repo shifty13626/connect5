@@ -64,32 +64,130 @@ class State:
         return False
 
     @staticmethod
-    def get_score_four(position):
+    def get_score_four(my_position, opponent_position):
         score = 0
-        if position & (position >> (BOARD_HEIGHT - 1)) & (position >> ((BOARD_HEIGHT - 1) * 2)) & (
-                (BOARD_HEIGHT - 1) * 3) != 0:
-            score += 8
-        if position & (position >> (BOARD_HEIGHT + 1)) & (position >> ((BOARD_HEIGHT + 1) * 2)) & (
-                position >> ((BOARD_HEIGHT + 1) * 3)) != 0:
-            score += 8
-        if position & (position >> BOARD_HEIGHT) & (position >> (BOARD_HEIGHT * 2)) & (
-                position >> (BOARD_HEIGHT * 3)) != 0:
-            score += 8
-        if position & (position >> 1) & (position >> 2) & (position >> 3) != 0:
-            score += 8
+        # diag1
+        diag1 = my_position & (my_position >> (BOARD_HEIGHT - 1)) & (my_position >> ((BOARD_HEIGHT - 1) * 2)) & (
+                my_position >> (BOARD_HEIGHT - 1) * 3) & ((opponent_position >> ((BOARD_HEIGHT - 1) * 4)) ^ 1)
+        if diag1 != 0:
+            count = 0
+            for i in range(0, BOARD_HEIGHT * BOARD_WIDTH):
+                count += diag1 >> i & 1
+            score += pow(count, 4)
+
+        diag1 = (opponent_position ^ 1) & (my_position >> (BOARD_HEIGHT - 1)) & (
+                    my_position >> ((BOARD_HEIGHT - 1) * 2)) & (
+                        my_position >> (BOARD_HEIGHT - 1) * 3) & (my_position >> (BOARD_HEIGHT - 1) * 4)
+        if diag1 != 0:
+            count = 0
+            for i in range(0, BOARD_HEIGHT * BOARD_WIDTH):
+                count += diag1 >> i & 1
+            score += pow(count, 4)
+
+        # diag2
+        diag2 = my_position & (my_position >> (BOARD_HEIGHT + 1)) & (my_position >> ((BOARD_HEIGHT + 1) * 2)) & (
+                my_position >> ((BOARD_HEIGHT + 1) * 3)) & ((opponent_position >> ((BOARD_HEIGHT + 1) * 4)) ^ 1)
+        if diag2 != 0:
+            count = 0
+            for i in range(0, BOARD_HEIGHT * BOARD_WIDTH):
+                count += diag2 >> i & 1
+            score += pow(count, 4)
+
+        diag2 = (opponent_position ^ 1) & (my_position >> (BOARD_HEIGHT + 1)) & (
+                    my_position >> ((BOARD_HEIGHT + 1) * 2)) & (
+                        my_position >> ((BOARD_HEIGHT + 1) * 3)) & (my_position >> ((BOARD_HEIGHT + 1) * 4))
+        if diag2 != 0:
+            count = 0
+            for i in range(0, BOARD_HEIGHT * BOARD_WIDTH):
+                count += diag2 >> i & 1
+            score += pow(count, 4)
+
+        # row
+        row = my_position & (my_position >> BOARD_HEIGHT) & (my_position >> (BOARD_HEIGHT * 2)) & (
+                my_position >> (BOARD_HEIGHT * 3)) & ((opponent_position >> (BOARD_HEIGHT * 4)) ^ 1)
+        if row != 0:
+            count = 0
+            for i in range(0, BOARD_HEIGHT * BOARD_WIDTH):
+                count += row >> i & 1
+            score += pow(count, 4)
+
+        row = (opponent_position ^ 1) & (my_position >> BOARD_HEIGHT) & (my_position >> (BOARD_HEIGHT * 2)) & (
+                my_position >> (BOARD_HEIGHT * 3)) & (my_position >> (BOARD_HEIGHT * 4))
+        if row != 0:
+            count = 0
+            for i in range(0, BOARD_HEIGHT * BOARD_WIDTH):
+                count += row >> i & 1
+            score += pow(count, 4)
+
+        # col
+        col = my_position & (my_position >> 1) & (my_position >> 2) & (my_position >> 3) & (
+                (opponent_position >> 4) ^ 1)
+        if col != 0:
+            count = 0
+            for i in range(0, BOARD_HEIGHT * BOARD_WIDTH):
+                count += col >> i & 1
+            score += pow(count, 4)
+
+        col = (opponent_position ^ 1) & (my_position >> 1) & (my_position >> 2) & (my_position >> 3) & (
+                    my_position >> 4)
+        if col != 0:
+            count = 0
+            for i in range(0, BOARD_HEIGHT * BOARD_WIDTH):
+                count += col >> i & 1
+            score += pow(count, 4)
+
         return score
 
     @staticmethod
-    def get_score_three(position):
+    def get_score_three(my_position, opponent_position):
         score = 0
-        if position & (position >> (BOARD_HEIGHT - 1)) & (position >> ((BOARD_HEIGHT - 1) * 2)) != 0:
-            score += 2
-        if position & (position >> (BOARD_HEIGHT + 1)) & (position >> ((BOARD_HEIGHT + 1) * 2)) != 0:
-            score += 2
-        if position & (position >> BOARD_HEIGHT) & (position >> (BOARD_HEIGHT * 2)) != 0:
-            score += 2
-        if position & (position >> 1) & (position >> 2) != 0:
-            score += 2
+        diag1 = my_position & \
+                (my_position >> (BOARD_HEIGHT - 1)) & \
+                (my_position >> ((BOARD_HEIGHT - 1) * 2)) & \
+                ((opponent_position >> ((BOARD_HEIGHT - 1) * 3)) ^ 1) & \
+                ((my_position >> ((BOARD_HEIGHT - 1) * 3)) ^ 1) & \
+                ((opponent_position >> ((BOARD_HEIGHT - 1) * 4)) ^ 1)
+        if diag1 != 0:
+            count = 0
+            for i in range(0, BOARD_HEIGHT * BOARD_WIDTH):
+                count += diag1 >> i & 1
+            score += pow(count, 3)
+
+        diag2 = my_position & \
+                (my_position >> (BOARD_HEIGHT + 1)) & \
+                (my_position >> ((BOARD_HEIGHT + 1) * 2)) & \
+                ((opponent_position >> ((BOARD_HEIGHT + 1) * 3)) ^ 1) & \
+                ((my_position >> ((BOARD_HEIGHT + 1) * 3)) ^ 1) & \
+                ((opponent_position >> ((BOARD_HEIGHT + 1) * 4)) ^ 1)
+        if diag2 != 0:
+            count = 0
+            for i in range(0, BOARD_HEIGHT * BOARD_WIDTH):
+                count += diag2 >> i & 1
+            score += pow(count, 3)
+
+        row = my_position & \
+              (my_position >> BOARD_HEIGHT) & \
+              (my_position >> (BOARD_HEIGHT * 2)) & \
+              ((opponent_position >> (BOARD_HEIGHT * 3)) ^ 1) & \
+              ((my_position >> (BOARD_HEIGHT * 3)) ^ 1) & \
+              ((opponent_position >> (BOARD_HEIGHT * 4)) ^ 1)
+        if row != 0:
+            count = 0
+            for i in range(0, BOARD_HEIGHT * BOARD_WIDTH):
+                count += row >> i & 1
+            score += pow(count, 3)
+
+        col = my_position & (my_position >> 1) & \
+              (my_position >> 2) & \
+              ((opponent_position >> 3) ^ 1) & \
+              ((my_position >> 3) ^ 1) & \
+              ((opponent_position >> 4) ^ 1)
+
+        if col != 0:
+            count = 0
+            for i in range(0, BOARD_HEIGHT * BOARD_WIDTH):
+                count += col >> i & 1
+            score += pow(count, 3)
         return score
 
     @staticmethod
@@ -192,6 +290,10 @@ class State:
                 # human_score += ((self.human_position & (1 << shift))  >> shift) * value
                 ai_score += ((self.ai_position >> shift) & 1) * value
                 human_score += ((self.human_position >> shift) & 1) * value
+            ai_score += State.get_score_three(my_position=self.ai_position, opponent_position=self.human_position)
+            ai_score += State.get_score_four(my_position=self.ai_position, opponent_position=self.human_position)
+            human_score += State.get_score_three(my_position=self.human_position, opponent_position=self.ai_position)
+            human_score += State.get_score_four(my_position=self.human_position, opponent_position=self.ai_position)
             return ai_score - human_score
 
     def get_possible_moves(self):
