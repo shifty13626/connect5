@@ -11,7 +11,7 @@ class Game:
     state = None
     current_player = first_player
 
-    def __init__(self, max_depth=5):
+    def __init__(self, max_depth=7):
         self.max_depth = max_depth
 
     def start_game(self):

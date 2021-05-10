@@ -43,6 +43,7 @@ class State:
         self.depth = depth
         self.col_heights = col_heights
         self.current_player = current_player
+        self.old_known_states = {}
 
     @property
     def human_position(self):
@@ -235,6 +236,7 @@ class State:
             new_ai_position, new_game_position, new_col_heights = self.play_turn(possible_move, first_player)
             new_state = State(new_ai_position, new_game_position, new_col_heights, self.depth + 1, current_player=(Player.IA if self.current_player == Player.HUMAN else Player.HUMAN))
             children.append(new_state)
+        children.sort(key=lambda child: child.get_heuristic_v3())
         return children
 
     @staticmethod
@@ -359,7 +361,9 @@ class State:
             # MaximizingPlayer
             else:
                 w_value = -infinity
-                for child in ai_state.get_children(first_player):
+                children = ai_state.get_children(first_player)
+                children.reverse()
+                for child in children:
                     if child not in known_states:
                         w_value = max(w_value, alpha_beta_pruning(child, ai_alpha, ai_beta, ai_max_depth))
                         known_states[child] = w_value
@@ -380,5 +384,7 @@ class State:
                 best_score = v
                 best_state = state
         print("Profondeur :", max_depth, "| Possibilités :", len(known_states))
+
+        self.old_known_states = known_states.copy()
         return best_state
 
