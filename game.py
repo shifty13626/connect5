@@ -1,18 +1,22 @@
 from Player import Player
 from state import State, BOARD_WIDTH
 from colors import Colors
+import time
 
-NUMBER_OF_TURNS_BEFORE_INCREMENTING_DEPTH = 12
+NUMBER_OF_TURNS_BEFORE_INCREMENTING_DEPTH = 25
 
 
 class Game:
-    def __init__(self, max_depth=4):
+    first_player = Player.IA
+    state = None
+    current_player = first_player
+
+    def __init__(self, max_depth=5):
         self.max_depth = max_depth
-        self.state = State(0, 0)
-        self.current_player = Player.IA
 
     def start_game(self):
         turn_count = 1
+        self.ask_first_player()
         while not self.state.is_terminal_state():
             if turn_count % NUMBER_OF_TURNS_BEFORE_INCREMENTING_DEPTH == 0:
                 self.max_depth += 1
@@ -27,14 +31,16 @@ class Game:
                     self.state.print_board()
                     column_selected = int(input(
                         Colors.HEADER.value + "Selectionnez la colonne dans laquelle placer votre pion : " + Colors.ENDC.value))
-                ai_pos, pos, heights = self.state.play_turn(column_selected, first_player=Player.IA)
-                self.state = State(ai_pos, pos, heights)
+                ai_pos, pos, heights = self.state.play_turn(column_selected, first_player=self.first_player)
                 self.current_player = Player.IA
+                self.state = State(ai_pos, pos, heights, current_player=self.current_player)
             # if IA
             else:
-                self.state = self.state.get_next_move(first_player=Player.IA, max_depth=self.max_depth)
-                print(Colors.HEADER.value + "L'IA vient de jouer" + Colors.ENDC.value)
+                start_time = time.time()
+                self.state = self.state.get_next_move(first_player=self.first_player, max_depth=self.max_depth)
                 self.current_player = Player.HUMAN
+                self.state.current_player = self.current_player
+                print(Colors.HEADER.value + "L'IA vient de jouer en " + str(round(time.time() - start_time, 2)) + " secondes" + Colors.ENDC.value)
             turn_count += 1
             print()
         # end game
@@ -50,6 +56,11 @@ class Game:
         if entry in self.state.get_possible_moves():
             return True
         return False
+
+    def ask_first_player(self):
+        self.first_player = Player.IA if input("Voulez-vous commencer? (O/n)") == "n" else Player.HUMAN
+        self.current_player = self.first_player
+        self.state = State(0, 0, current_player=self.current_player)
 
 
 if __name__ == '__main__':

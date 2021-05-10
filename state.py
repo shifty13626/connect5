@@ -35,13 +35,14 @@ class GameStatus(Enum):
 class State:
     game_status = GameStatus.NOT_ENDED
 
-    def __init__(self, ai_position, game_position, col_heights=None, depth=0):
+    def __init__(self, ai_position, game_position, col_heights=None, depth=0, current_player=Player.IA):
         if col_heights is None:
             col_heights = [i * BOARD_HEIGHT for i in range(0, BOARD_WIDTH)]
         self.ai_position = ai_position
         self.game_position = game_position
         self.depth = depth
         self.col_heights = col_heights
+        self.current_player = current_player
 
     @property
     def human_position(self):
@@ -134,7 +135,7 @@ class State:
         children = []
         for possible_move in self.get_possible_moves():
             new_ai_position, new_game_position, new_col_heights = self.play_turn(possible_move, first_player)
-            new_state = State(new_ai_position, new_game_position, new_col_heights, self.depth + 1)
+            new_state = State(new_ai_position, new_game_position, new_col_heights, self.depth + 1, current_player=(Player.IA if self.current_player == Player.HUMAN else Player.HUMAN))
             children.append(new_state)
         return children
 
@@ -207,8 +208,7 @@ class State:
         new_col_heights[col] += 1
         new_game_position = self.game_position ^ token
         new_ai_position = self.ai_position
-        if (first_player == Player.IA and self.depth % 2 == 0) or (
-                first_player == Player.HUMAN and self.depth % 2 == 1):
+        if self.current_player == Player.IA:
             new_ai_position ^= token
         return new_ai_position, new_game_position, new_col_heights
 
