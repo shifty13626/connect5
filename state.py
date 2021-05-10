@@ -321,11 +321,11 @@ class State:
         for row in range(BOARD_HEIGHT - 2, -1, -1):
             for column in range(0, BOARD_WIDTH):
                 if ai_board & (1 << (BOARD_HEIGHT * column + row)):
-                    print(Colors.FAIL.value + "1" + Colors.FAIL.value, end='')
+                    print(Colors.FAIL.value + "0" + Colors.FAIL.value, end='')
                 elif total_board & (1 << (BOARD_HEIGHT * column + row)):
-                    print(Colors.OKGREEN.value + "2" + Colors.OKGREEN.value, end='')
+                    print(Colors.OKGREEN.value + "0" + Colors.OKGREEN.value, end='')
                 else:
-                    print(Colors.OKCYAN.value + "0" + Colors.OKCYAN.value, end='')
+                    print(Colors.OKCYAN.value + " " + Colors.OKCYAN.value, end='')
                 if 0 <= column < 11:
                     print(Colors.OKCYAN.value + " | " + Colors.OKCYAN.value, end='')
             print()
@@ -343,20 +343,20 @@ class State:
 
             if ai_state.is_terminal_state() or ai_state.depth > ai_max_depth:
                 node_value = ai_state.get_heuristic_v3()
-                return node_value
+                return node_value, ai_alpha, ai_beta
             # MinimizingPlayer
             if ai_state.depth % 2 == 1:
                 w_value = infinity
                 for child in ai_state.get_children(first_player):
                     if child not in known_states:
-                        w_value = min(w_value, alpha_beta_pruning(child, ai_alpha, ai_beta, ai_max_depth))
+                        w_value = min(w_value, alpha_beta_pruning(child, ai_alpha, ai_beta, ai_max_depth)[0])
                         known_states[child] = w_value
                     else:
                         w_value = known_states[child]
                     ai_beta = min(ai_beta, w_value)
                     if ai_alpha >= ai_beta:
                         break
-                return w_value
+                return w_value, ai_alpha, ai_beta
 
             # MaximizingPlayer
             else:
@@ -365,24 +365,28 @@ class State:
                 children.reverse()
                 for child in children:
                     if child not in known_states:
-                        w_value = max(w_value, alpha_beta_pruning(child, ai_alpha, ai_beta, ai_max_depth))
+                        w_value = max(w_value, alpha_beta_pruning(child, ai_alpha, ai_beta, ai_max_depth)[0])
                         known_states[child] = w_value
                     else:
                         w_value = known_states[child]
                     ai_alpha = max(ai_alpha, w_value)
                     if ai_alpha >= ai_beta:
                         break
-                return w_value
+                return w_value, ai_alpha, ai_beta
 
         self.depth = 0
         known_states = {}
         best_state = None
         best_score = -infinity
+        alpha = None
+        beta = None
         for state in self.get_children(first_player):
-            v = alpha_beta_pruning(state, -infinity, infinity, max_depth)
+            v, a, b = alpha_beta_pruning(state, -infinity, infinity, max_depth)
             if v >= best_score:
                 best_score = v
                 best_state = state
+                alpha = a
+                beta = b
         print("Profondeur :", max_depth, "| Possibilités :", len(known_states))
 
         self.old_known_states = known_states.copy()
